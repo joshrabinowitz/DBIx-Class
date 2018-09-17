@@ -49,164 +49,11 @@ env: CLEANTEST=true
 
 perl:
   - "5.8"
-  - "5.10"
-  - "5.22-extras"
 
 matrix:
   fast_finish: true
 
   include:
-
-    # Same as the "master matrix" above, frozen under older dist/infrastructure
-    # In genereal it is strongly recommended to keep things on the older
-    # version indefinitely - there is little value in-depth smoking on
-    # more recent software stacks
-    - perl: "5.8"
-      sudo: required
-      dist: precise
-      env:
-        - CLEANTEST=false
-
-    - perl: "5.10"
-      sudo: required
-      dist: precise
-      env:
-        - CLEANTEST=false
-
-    - perl: "5.22-extras"
-      sudo: required
-      dist: precise
-      env:
-        - CLEANTEST=false
-
-    # CLEANTEST of minimum supported with non-tracing poisoning, single thread (hence the sudo)
-    - perl: "5.8.3_nt_mb"
-      sudo: required
-      dist: precise
-      env:
-        - VCPU_USE=1
-        - CLEANTEST=true
-        - POISON_ENV=true
-        - DBIC_TRACE_PROFILE=console_monochrome
-        - BREWVER=5.8.3
-        - BREWOPTS="-Dusemorebits"
-
-    # Full Test of minimum supported without threads with plain poisoned trace
-    - perl: "5.8.3_nt"
-      sudo: required
-      dist: precise
-      # run these under legacy - great simulation of low memory env
-      group: legacy
-      env:
-        - CLEANTEST=false
-        - POISON_ENV=true
-        - DBIC_TRACE=1
-        - BREWVER=5.8.3
-
-    # Full Test of minimum supported with threads with non-tracing poisoning
-    - perl: "5.8.5_thr"
-      sudo: required
-      dist: precise
-      # run these under legacy - great simulation of low memory env
-      group: legacy
-      env:
-        - CLEANTEST=false
-        - POISON_ENV=true
-        - DBIC_TRACE_PROFILE=console
-        - BREWVER=5.8.5
-        - BREWOPTS="-Duseithreads"
-
-    # CLEANTEST of solaris-like perl with non-tracing poisoning
-    - perl: "5.8.4_nt"
-      sudo: false
-      dist: precise
-      env:
-        - CLEANTEST=true
-        - POISON_ENV=true
-        - DBIC_TRACE_PROFILE=console
-        - BREWVER=5.8.4
-
-    # Full test: this particular perl is quite widespread, single thread
-    - perl: "5.8.8_thr"
-      sudo: required
-      dist: precise
-      group: legacy
-      env:
-        - VCPU_USE=1
-        - CLEANTEST=false
-        - BREWVER=5.8.8
-        - BREWOPTS="-Duseithreads"
-
-    # CLEANTEST: this is the perl suse ships, with env poisoning
-    - perl: "5.10.0_thr_dbg"
-      sudo: false
-      dist: precise
-      env:
-        - CLEANTEST=true
-        - POISON_ENV=true
-        - BREWVER=5.10.0
-        - BREWOPTS="-DDEBUGGING -Duseithreads"
-
-    # CLEANTEST: this one is in a number of debian-based LTS (test a sane CPAN.pm, single thread)
-    - perl: "5.14.2_thr_mb"
-      sudo: required
-      dist: precise
-      env:
-        - VCPU_USE=1
-        - CLEANTEST=true
-        - BREWVER=5.14.2
-        - BREWOPTS="-Duseithreads -Dusemorebits"
-
-    ###
-    # some permutations of tracing and envvar poisoning
-
-    - perl: "5.12.3_thr"
-      sudo: false
-      dist: precise
-      env:
-        - CLEANTEST=true
-        - POISON_ENV=true
-        - DBIC_TRACE=1
-        - DBIC_MULTICREATE_DEBUG=1
-        - DBIC_STORAGE_RETRY_DEBUG=1
-        - DBIC_TRACE_PROFILE=console
-        - BREWVER=5.12.3
-        - BREWOPTS="-Duseithreads"
-
-    - perl: "5.16.3_thr_mb"
-      sudo: required
-      dist: precise
-      env:
-        - CLEANTEST=false
-        - DBIC_TRACE=1
-        - DBICTEST_VERSION_WARNS_INDISCRIMINATELY=1
-        - BREWVER=5.16.3
-        - BREWOPTS="-Duseithreads -Dusemorebits"
-
-    - perl: "5.18-extras"
-      sudo: required
-      # explicit new infra spec preparing for a future forced upgrade
-      dist: trusty
-      env:
-        - CLEANTEST=false
-        - POISON_ENV=true
-        - DBIC_TRACE=1
-        - DBIC_TRACE_PROFILE=console_monochrome
-        - DBICTEST_VIA_REPLICATED=0
-        - DBICTEST_VERSION_WARNS_INDISCRIMINATELY=1
-
-    - perl: "5.26.1_thr_qm"
-      # explicit new infra spec preparing for a future forced upgrade
-      # also need to pull in a sufficiently new compiler for quadmath.h
-      sudo: required
-      dist: trusty
-      env:
-        - CLEANTEST=true
-        - POISON_ENV=true
-        - MVDT=false
-        - BREWVER=5.26.1
-        - BREWOPTS="-Duseithreads -Dusequadmath"
-
 
     ###
     # Start of the allow_failures block
@@ -222,8 +69,8 @@ matrix:
         # FIXME - need to switch to gcc-7 for -fsanitize-address-use-after-scope,
         #         https://github.com/travis-ci/apt-package-whitelist/issues/3933
         #         https://travis-ci.org/Perl5/DBIx-Class/jobs/356823605#L3479-L3926
-        - CC=gcc-6
-        - CXX=g++-6
+        - CC=gcc-7
+        - CXX=g++-7
         # FIXME - something in perl confuses ASan, do no trace leaks for now
         #         https://www.nntp.perl.org/group/perl.perl5.porters/2018/03/msg250024.html
         #         https://www.nntp.perl.org/group/perl.perl5.porters/2018/03/msg250022.html
@@ -238,8 +85,8 @@ matrix:
             - libc6
             - libc6:i386
             - binutils
-            - gcc-6
-            - g++-6
+            - gcc-7
+            - g++-7
 
     # ASan-instrumented threaded bleadperl with blead CPAN, full depchain test ( but only DBD::SQLite is used )
     - perl: "devcpan_bleadperl_thr_mb_asan"
@@ -249,8 +96,7 @@ matrix:
       env:
         - CLEANTEST=true
         - DEVREL_DEPS=true
-        # FIXME - temp workaround for https://github.com/gugod/App-perlbrew/issues/606
-        - BREWVER=5.27.10
+        - BREWVER=blead
         # FIXME - need to switch to gcc-7 for -fsanitize-address-use-after-scope,
         #         https://github.com/travis-ci/apt-package-whitelist/issues/3933
         #         https://travis-ci.org/Perl5/DBIx-Class/jobs/356823605#L3479-L3926
@@ -283,108 +129,6 @@ matrix:
         - DEVREL_DEPS=true
         - BREWVER=blead
         - BREWOPTS="-Duseithreads -Dusemorebits"
-
-    # bleadperl with stock CPAN, full depchain test with non-tracing poisoning, single thread
-    - perl: "bleadperl"
-      sudo: required
-      # explicitly do not specify dist - see what the default does
-      env:
-        - VCPU_USE=1
-        - CLEANTEST=true
-        - POISON_ENV=true
-        - BREWVER=blead
-
-    # threaded oldest possible with blead CPAN
-    - perl: "devcpan_5.8.1_thr_mb"
-      sudo: false
-      dist: precise
-      env:
-        - CLEANTEST=true
-        - DEVREL_DEPS=true
-        - BREWVER=5.8.1
-        - BREWOPTS="-Duseithreads -Dusemorebits"
-
-    # oldest possible with blead CPAN with poisoning and plain trace
-    - perl: "devcpan_5.8.1"
-      sudo: false
-      dist: precise
-      env:
-        - CLEANTEST=true
-        - DEVREL_DEPS=true
-        - POISON_ENV=true
-        - DBIC_TRACE=1
-        - DBICTEST_VERSION_WARNS_INDISCRIMINATELY=1
-        - BREWVER=5.8.1
-
-    # 5.8.3 with blead CPAN
-    - perl: "devcpan_5.8.3_mb"
-      sudo: required
-      # explicit new infra spec preparing for a future forced upgrade
-      dist: trusty
-      env:
-        - CLEANTEST=false
-        - DEVREL_DEPS=true
-        - BREWVER=5.8.3
-        - BREWOPTS="-Dusemorebits"
-
-    # 5.8.7 threaded with blead CPAN with non-tracing poisoning
-    - perl: "devcpan_5.8.7_thr"
-      sudo: false
-      dist: precise
-      env:
-        - CLEANTEST=true
-        - DEVREL_DEPS=true
-        - POISON_ENV=true
-        - BREWVER=5.8.7
-        - BREWOPTS="-Duseithreads"
-
-    # 5.8.8 threaded MB (exercises P5#72210)
-    - perl: "devcpan_5.8.8_thr_mb"
-      sudo: false
-      dist: precise
-      env:
-        - CLEANTEST=true
-        - DBICTEST_VERSION_WARNS_INDISCRIMINATELY=1
-        - DEVREL_DEPS=true
-        - BREWVER=5.8.8
-        - BREWOPTS="-Duseithreads -Dusemorebits"
-
-    # 5.10.0 threaded with blead CPAN
-    - perl: "devcpan_5.10.0_thr_mb"
-      sudo: false
-      dist: precise
-      env:
-        - CLEANTEST=true
-        - DEVREL_DEPS=true
-        - BREWVER=5.10.0
-        - BREWOPTS="-Duseithreads -Dusemorebits"
-
-    # 5.12.1 with blead CPAN
-    - perl: "devcpan_5.12.1_thr"
-      sudo: false
-      dist: precise
-      env:
-        - CLEANTEST=true
-        - DEVREL_DEPS=true
-        - BREWVER=5.12.1
-        - BREWOPTS="-Duseithreads"
-
-
-  # which ones of the above can fail
-  allow_failures:
-
-    # these run with various dev snapshots - allowed to fail
-    - perl: devcpan_5.24.3_thr_asan
-    - perl: devcpan_bleadperl_thr_mb_asan
-    - perl: devcpan_bleadperl_thr_mb
-    - perl: bleadperl
-    - perl: devcpan_5.8.1_thr_mb
-    - perl: devcpan_5.8.1
-    - perl: devcpan_5.8.3_mb
-    - perl: devcpan_5.8.7_thr
-    - perl: devcpan_5.8.8_thr_mb
-    - perl: devcpan_5.10.0_thr_mb
-    - perl: devcpan_5.12.1_thr
 
 
 ###
